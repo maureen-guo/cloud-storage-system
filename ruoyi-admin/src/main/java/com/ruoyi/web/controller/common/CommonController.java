@@ -111,6 +111,13 @@ public class CommonController
             List<String> originalFilenames = new ArrayList<String>();
             for (MultipartFile file : files)
             {
+//                if (file == null) {
+//                    log.error("未接收到文件！");
+//                    throw new IllegalArgumentException("文件不能为空！");
+//                }
+//                log.info("接收到的文件名：{}", file.getOriginalFilename());
+                System.out.println("接收到的文件名：" + file.getOriginalFilename());
+                System.out.println("接收到的文件路径：" + file.getResource());
                 // 上传并返回新文件名称
                 String fileName = FileUploadUtils.upload(filePath, file);
                 String url = serverConfig.getUrl() + fileName;
@@ -157,6 +164,7 @@ public class CommonController
         }
         catch (Exception e)
         {
+            e.printStackTrace(); // 打印详细的异常信息
             log.error("下载文件失败", e);
         }
     }

@@ -82,11 +82,13 @@ public class CommonController
             // 上传并返回新文件名称
             String fileName = FileUploadUtils.upload(filePath, file);
             String url = serverConfig.getUrl() + fileName;
+            long size = file.getSize();
             AjaxResult ajax = AjaxResult.success();
             ajax.put("url", url);
             ajax.put("fileName", fileName);
             ajax.put("newFileName", FileUtils.getName(fileName));
             ajax.put("originalFilename", file.getOriginalFilename());
+            ajax.put("size", size);
             return ajax;
         }
         catch (Exception e)
@@ -109,6 +111,7 @@ public class CommonController
             List<String> fileNames = new ArrayList<String>();
             List<String> newFileNames = new ArrayList<String>();
             List<String> originalFilenames = new ArrayList<String>();
+            List<String> sizes = new ArrayList<>();
             for (MultipartFile file : files)
             {
 //                if (file == null) {
@@ -122,6 +125,8 @@ public class CommonController
                 String fileName = FileUploadUtils.upload(filePath, file);
                 String url = serverConfig.getUrl() + fileName;
                 urls.add(url);
+                long size = file.getSize();
+                sizes.add(String.valueOf(size));
                 fileNames.add(fileName);
                 newFileNames.add(FileUtils.getName(fileName));
                 originalFilenames.add(file.getOriginalFilename());
@@ -131,6 +136,7 @@ public class CommonController
             ajax.put("fileNames", StringUtils.join(fileNames, FILE_DELIMETER));
             ajax.put("newFileNames", StringUtils.join(newFileNames, FILE_DELIMETER));
             ajax.put("originalFilenames", StringUtils.join(originalFilenames, FILE_DELIMETER));
+            ajax.put("sizes", StringUtils.join(sizes, FILE_DELIMETER));
             return ajax;
         }
         catch (Exception e)

@@ -71,9 +71,15 @@
 
     <el-table v-loading="loading" :data="infoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="文件id" align="center" prop="fileId" />
+      <el-table-column label="文件id" align="center" prop="fileId" width="80" />
       <el-table-column label="文件名称" align="center" prop="fileName" />
       <el-table-column label="文件路径" align="center" prop="filePath" />
+      <!-- <el-table-column label="文件大小" align="center" prop="size" /> -->
+      <el-table-column label="文件大小" align="center" prop="size">
+        <template slot-scope="scope">
+          {{ formatSize(scope.row.size) }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -125,6 +131,9 @@
             <div slot="tip" class="el-upload__tip">只能上传doc/docx文件，且不超过10MB</div>
           </el-upload>
         </el-form-item>
+        <el-form-item label="文件大小" prop="size">
+          <el-input v-model="form.size" placeholder="请输入文件大小" disabled />
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -167,7 +176,8 @@ export default {
         pageNum: 1,
         pageSize: 10,
         fileName: null,
-        filePath: null
+        filePath: null,
+        size:null
       },
       // 表单参数
       form: {},
@@ -196,6 +206,7 @@ export default {
       this.loading = true;
       listInfo(this.queryParams).then(response => {
         this.infoList = response.rows;
+        console.log("接口返回的数据：", response.rows); // 检查是否有 size 字段
         this.total = response.total;
         this.loading = false;
       });
@@ -210,7 +221,8 @@ export default {
       this.form = {
         fileId: null,
         fileName: null,
-        filePath: null
+        filePath: null,
+        size: null
       };
       this.resetForm("form");
     },
@@ -292,10 +304,26 @@ export default {
     },
     // 文件上传成功处理
     handleFileSuccess(response, file, fileList) {
+      console.log("上传成功响应：", response);
       this.upload.isUploading = false;
       this.form.filePath = response.url;
+      this.form.size = response.size;
+      // 更新表格数据
+      const index = this.infoList.findIndex(item => item.fileId === this.form.fileId);
+      if (index !== -1) {
+        this.infoList[index].fileSize = response.size; // 更新 infoList 中的 fileSize
+      }
+      this.$nextTick(() => {
+        console.log("表格数据更新完成：", this.infoList);
+      });
+
       this.msgSuccess(response.msg);
 },
+    formatSize(size) {
+      if (size < 1024) return `${size} 字节`;
+      if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;
+      return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+    }
 
   }
 };

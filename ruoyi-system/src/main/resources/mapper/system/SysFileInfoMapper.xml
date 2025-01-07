@@ -8,10 +8,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="fileId"    column="file_id"    />
         <result property="fileName"    column="file_name"    />
         <result property="filePath"    column="file_path"    />
+        <result property="size" column="size" />
     </resultMap>
 
     <sql id="selectSysFileInfoVo">
-        select file_id, file_name, file_path from sys_file_info
+        select file_id, file_name, file_path, size from sys_file_info
     </sql>
 
     <select id="selectSysFileInfoList" parameterType="SysFileInfo" resultMap="SysFileInfoResult">
@@ -32,10 +33,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="fileName != null">file_name,</if>
             <if test="filePath != null">file_path,</if>
+            <if test="size != null">size,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="fileName != null">#{fileName},</if>
             <if test="filePath != null">#{filePath},</if>
+            <if test="size != null">#{size},</if>
          </trim>
     </insert>
 
@@ -44,6 +47,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
             <if test="fileName != null">file_name = #{fileName},</if>
             <if test="filePath != null">file_path = #{filePath},</if>
+            <if test="size != null">size = #{size},</if>
         </trim>
         where file_id = #{fileId}
     </update>

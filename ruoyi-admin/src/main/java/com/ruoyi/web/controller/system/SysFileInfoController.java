@@ -41,6 +41,7 @@ public class SysFileInfoController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysFileInfo sysFileInfo)
     {
+        System.out.println("controller接收到的文件信息：" + sysFileInfo);
         startPage();
         List<SysFileInfo> list = sysFileInfoService.selectSysFileInfoList(sysFileInfo);
         return getDataTable(list);
@@ -99,6 +100,36 @@ public class SysFileInfoController extends BaseController
         }
 
         return toAjax(rows);
+    }
+
+    /**
+     * 新增文件夹信息
+     */
+    @PreAuthorize("@ss.hasPermi('system:info:add')")
+    @Log(title = "文件信息", businessType = BusinessType.INSERT)
+    @PostMapping("/addFolder")
+    public AjaxResult addFolder(@RequestBody SysFileInfo sysFileInfo) {
+        System.out.println("新增文件夹controller接收到的文件信息：" + sysFileInfo);
+
+        if(sysFileInfo.getFileName() == null || sysFileInfo.getFileName().trim().isEmpty()) {
+            // 如果文件夹名称为空或只包含空格，返回错误
+            return AjaxResult.error("文件夹名称不能为空");
+        }
+        return toAjax(sysFileInfoService.insertFolder(sysFileInfo));
+
+    }
+
+    /*
+     * 查询文件夹信息
+     */
+    @PreAuthorize("@ss.hasPermi('system:info:query')")
+    @GetMapping("/getFolderInfo/{parentId}")
+    public TableDataInfo getFolderInfo(@PathVariable("parentId") Long parentId) {
+        System.out.println("查询文件夹信息controller接收到的文件信息：" + parentId);
+        startPage();
+        List<SysFileInfo> list = sysFileInfoService.selectSysFileInfoByParentId(parentId);
+        System.out.println("查询文件夹信息controller接收到的文件信息：" + list);
+        return getDataTable(list);
     }
 
     /**

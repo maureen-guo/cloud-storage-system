@@ -9,10 +9,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="fileName"    column="file_name"    />
         <result property="filePath"    column="file_path"    />
         <result property="size" column="size" />
+        <result property="fileMimeType" column="fileMimeType" />
+        <result property="parentId" column="parent_id" />
+        <result property="isFolder" column="is_folder" />
     </resultMap>
 
     <sql id="selectSysFileInfoVo">
-        select file_id, file_name, file_path, size from sys_file_info
+        select file_id, file_name, file_path, size, fileMimeType, parent_id, is_folder from sys_file_info
     </sql>
 
     <select id="selectSysFileInfoList" parameterType="SysFileInfo" resultMap="SysFileInfoResult">
@@ -25,7 +28,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     <select id="selectSysFileInfoByFileId" parameterType="Long" resultMap="SysFileInfoResult">
         <include refid="selectSysFileInfoVo"/>
-        where file_id = #{fileId}
+        <where>
+            file_id = #{fileId}
+        </where>
+    </select>
+
+    <select id="selectSysFileInfoByParentId" parameterType="Long" resultMap="SysFileInfoResult">
+        <include refid="selectSysFileInfoVo"/>
+        where parent_id = #{parentId}
     </select>
 
     <insert id="insertSysFileInfo" parameterType="SysFileInfo" useGeneratedKeys="true" keyProperty="fileId">
@@ -34,12 +44,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="fileName != null">file_name,</if>
             <if test="filePath != null">file_path,</if>
             <if test="size != null">size,</if>
+            parent_id,
+            <if test="fileMimeType != null">fileMimeType,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="fileName != null">#{fileName},</if>
             <if test="filePath != null">#{filePath},</if>
             <if test="size != null">#{size},</if>
+            #{parentId},
+            <if test="fileMimeType != null">#{fileMimeType},</if>
          </trim>
+    </insert>
+
+    <insert id="insertFolder" parameterType="SysFileInfo" useGeneratedKeys="true" keyProperty="fileId">
+        insert into sys_file_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fileName != null">file_name,</if>
+            <if test="filePath != null">file_path,</if>
+            parent_id,
+            <if test="isFolder != null">is_folder,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fileName != null">#{fileName},</if>
+            <if test="filePath != null">#{filePath},</if>
+            #{parentId},
+            <if test="isFolder != null">#{isFolder},</if>
+        </trim>
     </insert>
 
     <update id="updateSysFileInfo" parameterType="SysFileInfo">
@@ -48,6 +78,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="fileName != null">file_name = #{fileName},</if>
             <if test="filePath != null">file_path = #{filePath},</if>
             <if test="size != null">size = #{size},</if>
+            <if test="fileMimeType != null">fileMimeType = #{fileMimeType},</if>
         </trim>
         where file_id = #{fileId}
     </update>

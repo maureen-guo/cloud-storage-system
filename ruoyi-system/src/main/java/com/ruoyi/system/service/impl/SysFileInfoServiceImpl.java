@@ -58,6 +58,38 @@ public class SysFileInfoServiceImpl implements ISysFileInfoService
         return sysFileInfoMapper.insertSysFileInfo(sysFileInfo);
     }
 
+    /**
+     * 新增文件夹
+     */
+    @Override
+    public int insertFolder(SysFileInfo sysFileInfo) {
+        // 打印前端传递的参数
+        System.out.println("新建文件夹准备插入数据库的文件信息：" + sysFileInfo);
+        if(sysFileInfo.getParentId() == null) {
+           sysFileInfo.setFilePath("/"+sysFileInfo.getFileName());
+        }
+        else{
+            //获取父目录的 filePath
+            long parentid = sysFileInfo.getParentId();
+            SysFileInfo folderinfo = sysFileInfoMapper.selectSysFileInfoByFileId(parentid);
+            if (folderinfo == null || folderinfo.getIsFolder() != 1) {
+                throw new IllegalArgumentException("父目录不存在或不是文件夹");
+            }
+            String path = folderinfo.getFilePath()+"/"+sysFileInfo.getFileName();
+            sysFileInfo.setFilePath(path);
+        }
+        sysFileInfo.setIsFolder(1);
+        return sysFileInfoMapper.insertFolder(sysFileInfo);
+    }
+
+    /*
+     *查询文件夹信息
+     */
+    @Override
+    public List<SysFileInfo> selectSysFileInfoByParentId(Long fileId){
+        return sysFileInfoMapper.selectSysFileInfoByParentId(fileId);
+    }
+
 
 
     /**

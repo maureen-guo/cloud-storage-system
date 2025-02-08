@@ -36,6 +36,16 @@ public interface SysFileInfoMapper
     public int insertSysFileInfo(SysFileInfo sysFileInfo);
 
     /**
+     * 新增文件夹信息
+     */
+    public int insertFolder(SysFileInfo sysFileInfo);
+
+    /*
+     * 查询文件夹信息
+     */
+    public List<SysFileInfo> selectSysFileInfoByParentId(Long fileId);
+
+    /**
      * 修改文件信息
      * 
      * @param sysFileInfo 文件信息

@@ -29,6 +29,15 @@ public class SysFileInfo extends BaseEntity
     /** 文件大小 */
     private Long size;
 
+    /** 文件类型 */
+    private String fileMimeType;
+
+    /** 父文件夹ID */
+    private Long parentId;
+
+    /** 是否是文件夹（0-文件，1-文件夹） */
+    private Integer isFolder;
+
     public void setFileId(Long fileId) 
     {
         this.fileId = fileId;
@@ -60,6 +69,13 @@ public class SysFileInfo extends BaseEntity
     public Long getSize() { return size; }
     public void setSize(Long fileSize) { this.size = fileSize; }
 
+    public String getFileMimeType() { return fileMimeType; }
+    public void setFileMimeType(String fileMimeType) { this.fileMimeType = fileMimeType; }
+
+    public Long getParentId() { return parentId; }
+    public void setParentId(Long parentId) { this.parentId = parentId; }
+    public Integer getIsFolder() { return isFolder; }
+    public void setIsFolder(Integer isFolder) { this.isFolder = isFolder; }
 
     @Override
     public String toString() {
@@ -68,6 +84,9 @@ public class SysFileInfo extends BaseEntity
             .append("fileName", getFileName())
             .append("filePath", getFilePath())
             .append("fileSize", getSize())
+            .append("fileMimeType", getFileMimeType())
+            .append("parentId", getParentId())
+            .append("isFolder", getIsFolder())
             .toString();
     }
 }

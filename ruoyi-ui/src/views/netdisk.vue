@@ -13,7 +13,7 @@
                         @open="handleOpen"
                         @close="handleClose">
                         <el-submenu index="1">
-                            <template slot="title"> 
+                            <template slot="title">
                                 <div>
                                     <span style="font-weight: bold; font-size: 18px; text-transform: uppercase; color: #2853B7;">all files</span>
                                 </div>
@@ -36,9 +36,8 @@
                             {{ item.name }}
                         </el-breadcrumb-item>
                     </el-breadcrumb>
-                    <!-- <el-button @click="goBack">返回上一级</el-button> -->
                     <el-row :gutter="10" class="mb8">
-                        <el-col :span="1.5">
+                        <!-- <el-col :span="1.5">
                             <el-button
                             type="info"
                             plain
@@ -47,7 +46,7 @@
                             @click="handleAdd"
                             v-hasPermi="['system:info:add']"
                             >新增</el-button>
-                        </el-col>
+                        </el-col> -->
                         <el-col :span="1.5">
                             <el-button
                             type="info"
@@ -56,7 +55,7 @@
                             size="mini"
                             @click="handleAddMulti"
                             v-hasPermi="['system:info:add']"
-                            >批量上传</el-button>
+                            >上传</el-button>
                         </el-col>
                         <el-col :span="1.5">
                             <el-button
@@ -174,7 +173,7 @@
                             </template>
                         </el-table-column>
                     </el-table>
-   
+
                 <pagination
                     v-show="total>0"
                     :total="total"
@@ -186,8 +185,8 @@
 
 
                 </el-main>
-                <el-footer>Footer</el-footer>
-        
+                <!-- <el-footer>Footer</el-footer> -->
+
 
                      <!-- 添加或修改文件信息对话框 -->
                 <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -234,7 +233,7 @@
                     ref="upload" class="upload-demo" drag multiple
                     :limit="5"
                     :name="'files'"
-                    accept=".doc, .docx"
+                    accept=".doc, .docx, .pdf, .ppt, .pptx"
                     :action="upload.url2"
                     :headers="upload.headers"
                     :file-list="upload.fileList"
@@ -295,7 +294,7 @@ import { getToken } from "@/utils/auth";
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        fileName: null,
+        fileName: "",
         filePath: null,
         size:null,
         fileMimeType: null,
@@ -322,6 +321,7 @@ import { getToken } from "@/utils/auth";
      currentPath: [], // 当前路径数组，记录层级
      selectedFiles: [], //保存选中的文件
      currentFolder: null,  // 当前文件夹对象
+     validExtensions: [".doc", ".docx", ".pdf", ".pptx", "ppt"], // 允许的文件后缀
     };
   },
   created() {
@@ -335,7 +335,7 @@ import { getToken } from "@/utils/auth";
     if (savedPath) {
         this.currentPath = JSON.parse(savedPath);
     }
-    
+
     // 如果是根目录，初始化路径
     if (!fileId) {
         this.currentPath = [];
@@ -556,16 +556,37 @@ import { getToken } from "@/utils/auth";
         this.form.fileMimeType = response.mimetypes;
         console.log("表单数据更新：", this.form);
 
-        this.msgSuccess(`${file.name} 上传成功`);
+         // 确保 msgSuccess 存在
+         if (typeof this.msgSuccess === "function") {
+            this.msgSuccess(`${file.name} 上传成功`);
+        } else {
+            this.$message.success(`${file.name} 上传成功`);
+        }
+
+        // **修正 loading 状态，确保按钮恢复**
+        this.upload.isUploading = false;
         },
     /** 提交按钮 */
     submitFormMulti() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+            // 额外校验文件名后缀
+            const hasInvalidFile = this.fileRecords.some(file =>
+                !this.validExtensions.some(ext => file.fileName.toLowerCase().endsWith(ext))
+            );
+
+            if (hasInvalidFile) {
+                this.$modal.msgError("文件名必须包含有效的后缀，例如 .doc, .docx, .pdf, .ppt, .pptx");
+                return;
+            }
             // 新增操作
             addInfoBatch(this.form.fileRecords).then(response => {
               this.$modal.msgSuccess("新增成功");
-              this.open = false;
+              this.multiopen = false;
+              this.fileRecords = []; // 清空文件列表
+              this.upload.fileList = []; // 清空上传列表
+              this.form = {}; // 清空表单
+
               this.getList();
             });
         }
@@ -583,7 +604,7 @@ import { getToken } from "@/utils/auth";
         console.log("当前文件夹对象：", folder);
         console.log("当前文件夹ID：", this.currentFolder);
         if (folder.isFolder === 1) { // 如果是文件夹
-            this.$router.push({ 
+            this.$router.push({
             path: `/folder/${folder.fileId}`
         }).then(() => {
                 this.currentPath.push({ name: folder.fileName, id: folder.fileId });
@@ -592,7 +613,7 @@ import { getToken } from "@/utils/auth";
                 localStorage.setItem("currentPath", JSON.stringify(this.currentPath));
 
                 console.log("点击文件夹后更新 currentPath:", this.currentPath);
-                
+
                 this.getFolderContents(folder.fileId); // 调用新的接口获取文件夹内容
             }).catch(err => {
             console.error("导航失败：", err);
@@ -707,9 +728,7 @@ import { getToken } from "@/utils/auth";
     // console.log("当前路径为：", this.currentPath);
     // console.log("部分路径为：", partialPath);
     return partialPath.map(item => item.id).join('/');
-  }
-
-
+  },
     }
   }
 </script>
@@ -722,21 +741,21 @@ import { getToken } from "@/utils/auth";
     text-align: center;
     line-height: 60px;
   }
-  
+
   .el-aside {
     background-color: #2853B7;
     color: #333;
     text-align: center;
     line-height: 200px;
   }
-  
+
   .el-main {
     /* background-color: #E9EEF3;
     color: #333; */
     /* text-align: center; */
     line-height: 100px;
     overflow: auto; /* 启用滚动条 */
-    height: calc(100vh - 100px); /* 动态设置高度，减去其他区域占用的高度 */
+    /* height: calc(100vh - 100px); 动态设置高度，减去其他区域占用的高度 */
   }
   .main-box {
     background-color: #D9D9D9; /* 设置背景为白色 */

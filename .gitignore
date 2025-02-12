@@ -52,4 +52,4 @@ uploadPath/
 !*/build/*.xml
 
 # 数据库配置文件
-application-druid.yml
+ruoyi-admin/src/main/resources/application.yml

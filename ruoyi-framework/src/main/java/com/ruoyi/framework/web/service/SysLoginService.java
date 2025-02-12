@@ -74,7 +74,7 @@ public class SysLoginService
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
             AuthenticationContextHolder.setContext(authenticationToken);
             // 该方法会去调用UserDetailsServiceImpl.loadUserByUsername
-            authentication = authenticationManager.authenticate(authenticationToken);
+            authentication = authenticationManager.authenticate(authenticationToken);  //authenticate() 方法对认证请求进行处理
         }
         catch (Exception e)
         {

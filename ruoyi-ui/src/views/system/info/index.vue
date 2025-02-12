@@ -80,6 +80,7 @@
           {{ formatSize(scope.row.size) }}
         </template>
       </el-table-column>
+      <el-table-column label="文件类型" align="center" prop="fileMimeType" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -99,7 +100,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -119,7 +120,7 @@
           <el-upload
             ref="upload"
             :limit="1"
-            accept=".doc, .docx"
+            accept=".doc, .docx, .pdf, .ppt, .pptx"
             :action="upload.url"
             :headers="upload.headers"
             :file-list="upload.fileList"
@@ -177,7 +178,8 @@ export default {
         pageSize: 10,
         fileName: null,
         filePath: null,
-        size:null
+        size:null,
+        fileMimeType: null
       },
       // 表单参数
       form: {},
@@ -222,7 +224,8 @@ export default {
         fileId: null,
         fileName: null,
         filePath: null,
-        size: null
+        size: null,
+        fileMimeType: null
       };
       this.resetForm("form");
     },
@@ -308,10 +311,12 @@ export default {
       this.upload.isUploading = false;
       this.form.filePath = response.url;
       this.form.size = response.size;
+      this.form.fileMimeType = response.mimeType;
       // 更新表格数据
       const index = this.infoList.findIndex(item => item.fileId === this.form.fileId);
       if (index !== -1) {
         this.infoList[index].fileSize = response.size; // 更新 infoList 中的 fileSize
+        this.infoList[index].fileMimeType = response.mimeType;
       }
       this.$nextTick(() => {
         console.log("表格数据更新完成：", this.infoList);
@@ -319,6 +324,7 @@ export default {
 
       this.msgSuccess(response.msg);
 },
+
     formatSize(size) {
       if (size < 1024) return `${size} 字节`;
       if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;

@@ -44,8 +44,8 @@ public class AsyncFactory
             @Override
             public void run()
             {
-                String address = AddressUtils.getRealAddressByIP(ip);
-                StringBuilder s = new StringBuilder();
+                String address = AddressUtils.getRealAddressByIP(ip);  //获取当前用户登录的 IP 地址对应的地理位置
+                StringBuilder s = new StringBuilder();  //构建日志信息s
                 s.append(LogUtils.getBlock(ip));
                 s.append(address);
                 s.append(LogUtils.getBlock(username));

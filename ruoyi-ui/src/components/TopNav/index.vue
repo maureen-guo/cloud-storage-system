@@ -14,7 +14,7 @@
     </template>
 
     <!-- 顶部菜单超出数量折叠 -->
-    <el-submenu :style="{'--theme': theme}" index="more" :key="visibleNumber" v-if="topMenus.length > visibleNumber">
+    <el-submenu :style="{'--theme': theme}" index="more" v-if="topMenus.length > visibleNumber">
       <template slot="title">更多菜单</template>
       <template v-for="(item, index) in topMenus">
         <el-menu-item
@@ -96,8 +96,8 @@ export default {
       let activePath = path;
       if (path !== undefined && path.lastIndexOf("/") > 0 && hideList.indexOf(path) === -1) {
         const tmpPath = path.substring(1, path.length);
+        activePath = "/" + tmpPath.substring(0, tmpPath.indexOf("/"));
         if (!this.$route.meta.link) {
-          activePath = "/" + tmpPath.substring(0, tmpPath.indexOf("/"));
           this.$store.dispatch('app/toggleSideBarHide', false);
         }
       } else if(!this.$route.children) {

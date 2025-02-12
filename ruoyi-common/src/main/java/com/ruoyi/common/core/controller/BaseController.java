@@ -3,6 +3,8 @@ package com.ruoyi.common.core.controller;
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
 import java.util.List;
+
+import com.ruoyi.common.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.WebDataBinder;
@@ -15,11 +17,9 @@ import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.PageUtils;
-import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.sql.SqlUtil;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * web层通用数据处理
@@ -52,7 +52,14 @@ public class BaseController
      */
     protected void startPage()
     {
+        HttpServletRequest request = ServletUtils.getRequest();
+        System.out.println("pageNum 参数：" + request.getParameter("pageNum"));
+        System.out.println("pageSize 参数：" + request.getParameter("pageSize"));
         PageUtils.startPage();
+        System.out.println("当前页码：" + PageHelper.getLocalPage().getPageNum());
+        System.out.println("每页条数：" + PageHelper.getLocalPage().getPageSize());
+
+
     }
 
     /**

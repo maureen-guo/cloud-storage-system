@@ -36,7 +36,7 @@ public class SysOperlogController extends BaseController
     public TableDataInfo list(SysOperLog operLog)
     {
         startPage();
-        List<SysOperLog> list = operLogService.selectOperLogList(operLog);
+        List<SysOperLog> list = operLogService.selectOperLogList(operLog); //查询系统操作日志集合
         return getDataTable(list);
     }
 

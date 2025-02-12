@@ -42,6 +42,7 @@ public class SysUserOnlineController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(String ipaddr, String userName)
     {
+        //获得缓存的基本对象列表
         Collection<String> keys = redisCache.keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
         List<SysUserOnline> userOnlineList = new ArrayList<SysUserOnline>();
         for (String key : keys)
@@ -49,14 +50,17 @@ public class SysUserOnlineController extends BaseController
             LoginUser user = redisCache.getCacheObject(key);
             if (StringUtils.isNotEmpty(ipaddr) && StringUtils.isNotEmpty(userName))
             {
+                //通过登录地址/用户名称查询信息
                 userOnlineList.add(userOnlineService.selectOnlineByInfo(ipaddr, userName, user));
             }
             else if (StringUtils.isNotEmpty(ipaddr))
             {
+                //通过登录地址查询信息
                 userOnlineList.add(userOnlineService.selectOnlineByIpaddr(ipaddr, user));
             }
             else if (StringUtils.isNotEmpty(userName) && StringUtils.isNotNull(user.getUser()))
             {
+                //通过用户名称查询信息
                 userOnlineList.add(userOnlineService.selectOnlineByUserName(userName, user));
             }
             else
@@ -64,15 +68,16 @@ public class SysUserOnlineController extends BaseController
                 userOnlineList.add(userOnlineService.loginUserToUserOnline(user));
             }
         }
-        Collections.reverse(userOnlineList);
-        userOnlineList.removeAll(Collections.singleton(null));
+        Collections.reverse(userOnlineList); //反转表的顺序-- 将最近登录的用户排在最前面
+        userOnlineList.removeAll(Collections.singleton(null));  //移除空值
         return getDataTable(userOnlineList);
     }
+
 
     /**
      * 强退用户
      */
-    @PreAuthorize("@ss.hasPermi('monitor:online:forceLogout')")
+    @PreAuthorize("@ss.hasPermi('monitor:online:forceLogout')")  //在方法调用前进行权限验证
     @Log(title = "在线用户", businessType = BusinessType.FORCE)
     @DeleteMapping("/{tokenId}")
     public AjaxResult forceLogout(@PathVariable String tokenId)

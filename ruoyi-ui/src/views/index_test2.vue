@@ -308,7 +308,7 @@
           </div>
         </el-dialog>
 
-         <!-- 添加或修改文件信息对话框 -->
+         <!-- 添加或修改多文件信息对话框 -->
          <el-dialog :title="title" :visible.sync="multiopen" width="500px" append-to-body>
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
             <el-form-item v-for="(record, index) in fileRecords" :key="record.id" :label="'文件' + (index + 1)">
@@ -325,7 +325,7 @@
                 :headers="upload.headers"
                 :file-list="upload.fileList"
                 :on-progress="handleFileUploadProgress"
-                :on-success="handleFileSuccess"
+                :on-success="handleFileSuccesMulti"
                 :on-remove="handleFileRemove"
                 :auto-upload="false">
                 <i class="el-icon-upload"></i>
@@ -334,11 +334,17 @@
                 <div slot="tip" class="el-upload__tip">只能上传doc/docx文件，且不超过10MB</div>
               </el-upload>
             </el-form-item>
+            <!-- <el-form-item label="文件大小" prop="size">
+              <el-input v-model="form.size" placeholder="请输入文件大小" disabled />
+            </el-form-item> -->
+            <el-form-item v-for="(record, index) in fileRecords" :key="record.id" :label="'文件' + (index + 1)+'大小为'">
+              <el-input v-model="record.size" placeholder="文件大小为……"  disable/>
+            </el-form-item>
 
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button style="margin-left: 10px;" size="small" type="success" :loading="upload.isUploading" @click="submitUpload">上传到服务器</el-button>
-            <el-button type="primary" @click="submitForm">确 定</el-button>
+            <el-button type="primary" @click="submitFormMulti">确 定</el-button>
             <el-button @click="cancel">取 消</el-button>
           </div>
         </el-dialog>
@@ -349,7 +355,7 @@
 
   <script>
 
-import { listInfo, getInfo, delInfo, addInfo, updateInfo } from "@/api/system/info";
+import { listInfo, addInfoBatch, addInfo, updateInfo } from "@/api/system/info";
 import { getToken } from "@/utils/auth";
 
 export default {
@@ -388,7 +394,9 @@ export default {
        // 查询参数
       queryParams: {
         fileName: null,
-        filePath: null
+        filePath: null,
+        size:null,
+        fileMimeType: null
       },
     };
   },
@@ -417,7 +425,8 @@ export default {
       this.form = {
         fileId: null,
         fileName: null,
-        filePath: null
+        filePath: null,
+        fileMimeType: null
       };
       this.resetForm("form");
     },
@@ -464,14 +473,9 @@ export default {
       console.log("into handleFileUploadProgress")
       this.upload.isUploading = true;
     },
-//     // 文件上传成功处理
-//     handleFileSuccess(response, file, fileList) {
-//       this.upload.isUploading = false;
-//       this.form.filePath = response.url;
-//       this.msgSuccess(response.msg);
-// },
- // 文件上传成功处理
- handleFileSuccess(response, file) {
+
+    // 文件上传成功处理
+    handleFileSuccess(response, file) {
       const record = {
         id: this.fileRecords.length + 1, // 动态生成唯一 ID
         fileName: file.name, // 文件名称
@@ -497,6 +501,56 @@ export default {
       // 根据文件名移除对应记录
       this.fileRecords = this.fileRecords.filter(record => record.fileName !== file.name);
     },
+    handleFileSuccesMulti(response, file) {
+      console.log("上传成功响应：", response);
+      console.log("文件对象：", file);
+
+      const filePath = response.urls; // 修改为正确的字段名称
+      if (!filePath) {
+        console.error("上传响应中缺少文件路径，无法更新 fileRecords");
+        return;
+      }
+      const record = {
+        id: this.fileRecords.length + 1, // 动态生成唯一 ID
+        fileName: file.name, // 文件名称
+        filePath: filePath, // 文件路径
+        size: response.sizes,
+        fileMimeType: response.mimetypes
+      };
+
+      // 更新 fileRecords
+      this.fileRecords = [...this.fileRecords, record]; // 确保响应式更新
+      console.log("当前 fileRecords：", this.fileRecords);
+
+
+      // 更新表单数据
+      this.form.fileName = file.name;
+      this.form.filePath = response.urls;
+      this.form.fileRecords = this.fileRecords;
+      this.form.size = response.sizes;
+      this.form.fileMimeType = response.mimetypes;
+      console.log("表单数据更新：", this.form);
+
+      this.msgSuccess(`${file.name} 上传成功`);
+    },
+    /** 提交按钮 */
+    submitFormMulti() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+            // 新增操作
+            addInfoBatch(this.form.fileRecords).then(response => {
+              this.$modal.msgSuccess("新增成功");
+              this.open = false;
+              this.getList();
+            });
+        }
+      });
+    },
+    formatSize(size) {
+      if (size < 1024) return `${size} 字节`;
+      if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;
+      return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+    }
 
 }
 };

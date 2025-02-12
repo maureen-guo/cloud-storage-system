@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.common;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.framework.config.ServerConfig;
+import java.nio.file.*;
 
 /**
  * 通用请求处理
@@ -83,12 +85,15 @@ public class CommonController
             String fileName = FileUploadUtils.upload(filePath, file);
             String url = serverConfig.getUrl() + fileName;
             long size = file.getSize();
+            //获取mimetype
+            String mimeType = file.getContentType();
             AjaxResult ajax = AjaxResult.success();
             ajax.put("url", url);
             ajax.put("fileName", fileName);
             ajax.put("newFileName", FileUtils.getName(fileName));
             ajax.put("originalFilename", file.getOriginalFilename());
             ajax.put("size", size);
+            ajax.put("mimeType", mimeType);
             return ajax;
         }
         catch (Exception e)
@@ -112,6 +117,8 @@ public class CommonController
             List<String> newFileNames = new ArrayList<String>();
             List<String> originalFilenames = new ArrayList<String>();
             List<String> sizes = new ArrayList<>();
+            //加入文件类型字段
+            List<String> mimetypes = new ArrayList<>();
             for (MultipartFile file : files)
             {
 //                if (file == null) {
@@ -127,6 +134,9 @@ public class CommonController
                 urls.add(url);
                 long size = file.getSize();
                 sizes.add(String.valueOf(size));
+                //获取mimetype
+                String mimeType = file.getContentType();
+                mimetypes.add(mimeType);
                 fileNames.add(fileName);
                 newFileNames.add(FileUtils.getName(fileName));
                 originalFilenames.add(file.getOriginalFilename());
@@ -137,6 +147,7 @@ public class CommonController
             ajax.put("newFileNames", StringUtils.join(newFileNames, FILE_DELIMETER));
             ajax.put("originalFilenames", StringUtils.join(originalFilenames, FILE_DELIMETER));
             ajax.put("sizes", StringUtils.join(sizes, FILE_DELIMETER));
+            ajax.put("mimetypes", StringUtils.join(mimetypes, FILE_DELIMETER));
             return ajax;
         }
         catch (Exception e)
@@ -158,10 +169,19 @@ public class CommonController
             {
                 throw new Exception(StringUtils.format("资源文件({})非法，不允许下载。 ", resource));
             }
+            System.out.println("接收到的文件名：" + resource);
             // 本地资源路径
             String localPath = RuoYiConfig.getProfile();
             // 数据库资源地址
             String downloadPath = localPath + StringUtils.substringAfter(resource, Constants.RESOURCE_PREFIX);
+            // 打印文件路径，检查路径是否正确
+            System.out.println("下载文件路径: " + downloadPath);
+            // 检查文件是否存在
+            Path path = Paths.get(downloadPath);
+            if (!Files.exists(path)) {
+                throw new FileNotFoundException("文件未找到: " + downloadPath);
+            }
+
             // 下载名称
             String downloadName = StringUtils.substringAfterLast(downloadPath, "/");
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);

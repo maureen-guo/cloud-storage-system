@@ -102,18 +102,22 @@ public class FileUploadUtils
             throws FileSizeLimitExceededException, IOException, FileNameLengthLimitExceededException,
             InvalidExtensionException
     {
+        // 校验文件名长度
         int fileNamelength = Objects.requireNonNull(file.getOriginalFilename()).length();
         if (fileNamelength > FileUploadUtils.DEFAULT_FILE_NAME_LENGTH)
         {
             throw new FileNameLengthLimitExceededException(FileUploadUtils.DEFAULT_FILE_NAME_LENGTH);
         }
 
+        //文件大小校验
         assertAllowed(file, allowedExtension);
 
+        //生成一个基于时间路径和唯一标识的文件名
         String fileName = extractFilename(file);
 
+        //计算存储路径
         String absPath = getAbsoluteFile(baseDir, fileName).getAbsolutePath();
-        file.transferTo(Paths.get(absPath));
+        file.transferTo(Paths.get(absPath)); //保存文件到磁盘
         return getPathFileName(baseDir, fileName);
     }
 
@@ -128,13 +132,14 @@ public class FileUploadUtils
 
     public static final File getAbsoluteFile(String uploadDir, String fileName) throws IOException
     {
+        //将文件存储的目录（uploadDir）与文件名（fileName）拼接为绝对路径
         File desc = new File(uploadDir + File.separator + fileName);
-
+        // 检查文件是否存在
         if (!desc.exists())
         {
-            if (!desc.getParentFile().exists())
+            if (!desc.getParentFile().exists()) // 如果父目录不存在
             {
-                desc.getParentFile().mkdirs();
+                desc.getParentFile().mkdirs(); // 创建父目录
             }
         }
         return desc;

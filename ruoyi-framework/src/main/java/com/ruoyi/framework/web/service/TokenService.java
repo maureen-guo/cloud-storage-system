@@ -146,6 +146,7 @@ public class TokenService
      */
     public void refreshToken(LoginUser loginUser)
     {
+        //设置登录时间和过期时间
         loginUser.setLoginTime(System.currentTimeMillis());
         loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
         // 根据uuid将loginUser缓存

@@ -35,6 +35,7 @@
         </el-input>
         <div class="login-code">
           <img :src="codeUrl" @click="getCode" class="login-code-img"/>
+          <!--验证码图片通过 Vue 模板中的 <img> 标签进行显示 -->
         </div>
       </el-form-item>
       <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
@@ -62,7 +63,7 @@
 </template>
 
 <script>
-import { getCodeImg } from "@/api/login";
+import { getCodeImg } from "@/api/login";  //调用api
 import Cookies from "js-cookie";
 import { encrypt, decrypt } from '@/utils/jsencrypt'
 
@@ -104,16 +105,16 @@ export default {
     }
   },
   created() {
-    this.getCode();
+    this.getCode();  //页面加载时请求code
     this.getCookie();
   },
   methods: {
     getCode() {
-      getCodeImg().then(res => {
-        this.captchaEnabled = res.captchaEnabled === undefined ? true : res.captchaEnabled;
+      getCodeImg().then(res => {  //发起网络请求，与后端交互
+        this.captchaEnabled = res.captchaEnabled === undefined ? true : res.captchaEnabled; //判断是否启用验证码
         if (this.captchaEnabled) {
-          this.codeUrl = "data:image/gif;base64," + res.img;
-          this.loginForm.uuid = res.uuid;
+          this.codeUrl = "data:image/gif;base64," + res.img;  //将返回的验证码图片（base64 编码）赋值给 codeUrl，以便在页面上显示
+          this.loginForm.uuid = res.uuid; //保存uuid
         }
       });
     },
@@ -145,7 +146,7 @@ export default {
           }).catch(() => {
             this.loading = false;
             if (this.captchaEnabled) {
-              this.getCode();
+              this.getCode();   //登录失败重新获得验证码
             }
           });
         }

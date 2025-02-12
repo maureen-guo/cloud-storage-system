@@ -42,6 +42,7 @@ const user = {
       const code = userInfo.code
       const uuid = userInfo.uuid
       return new Promise((resolve, reject) => {
+        //这里 login() 方法返回一个 Promise，可以使用 .then() 方法处理请求成功的结果，使用 .catch() 处理请求失败的情况。
         login(username, password, code, uuid).then(res => {
           setToken(res.token)
           commit('SET_TOKEN', res.token)

@@ -75,6 +75,48 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/index_help',
+    component: Layout, // 使用 Layout 作为布局
+    children: [
+      {
+        path: 'test', // 子路径，这里可以随意设置
+        component: () => import('@/views/index_test'),
+        name: 'IndexTest',
+        meta: { title: '测一测', icon: 'test' }
+      }
+    ]
+  },
+  {
+    path: '/index_help2',
+    component: Layout, // 使用 Layout 作为布局
+    children: [
+      {
+        path: 'test', // 子路径，这里可以随意设置
+        component: () => import('@/views/index_test2'),
+        name: 'IndexTest2',
+        meta: { title: '测试2', icon: 'test2' }
+      }
+    ]
+  },
+  {
+    path: '/netdisk',
+    component: Layout, // 使用 Layout 作为布局
+    children: [
+      {
+        path: '', // 子路径，这里可以随意设置
+        component: () => import('@/views/netdisk'),
+        name: 'netdisk',
+        meta: { title: '网盘界面', icon: 'netdisk' }
+      }
+      // {
+      //   path: ':fileId', // 动态参数 :fileId，可选参数
+      //   component: () => import('@/views/netdisk'),
+      //   name: 'fileId',
+      //   meta: { title: '文件夹内容', icon: 'folder' }
+      // }
+    ]
+  },
+  {
     path: '/user',
     component: Layout,
     hidden: true,
@@ -103,6 +145,19 @@ export const dynamicRoutes = [
         component: () => import('@/views/system/user/authRole'),
         name: 'AuthRole',
         meta: { title: '分配角色', activeMenu: '/system/user' }
+      }
+    ]
+  },
+  {
+    path: '/folder',
+    component: Layout, // 使用 Layout 作为布局
+    roles: ['admin', 'editor'],    // 只有拥有 'admin' 或 'editor' 角色的用户才能访问
+    children: [
+      {
+        path: ':fileId', // 动态参数 :fileId，可选参数
+        component: () => import('@/views/netdisk'),
+        name: 'fileId',
+        meta: { title: '文件夹内容', icon: 'folder' }
       }
     ]
   },

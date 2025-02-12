@@ -19,10 +19,12 @@ public class ServerConfig
      */
     public String getUrl()
     {
+        //获取当前请求对象
         HttpServletRequest request = ServletUtils.getRequest();
         return getDomain(request);
     }
 
+    //提取域名部分
     public static String getDomain(HttpServletRequest request)
     {
         StringBuffer url = request.getRequestURL();
